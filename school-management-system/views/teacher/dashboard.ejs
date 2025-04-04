@@ -8,21 +8,32 @@
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to the Teacher Dashboard</h1>
-        <h2>Assigned Classes</h2>
+        <h1>Welcome, Teacher</h1>
+        <h2>Your Assigned Classes</h2>
         <ul>
-            <% if (classes && classes.length > 0) { %>
-                <% classes.forEach(classItem => { %>
-                    <li>
-                        <%= classItem.grade_name %>
-                        <a href="/teacher/attendance/<%= classItem.id %>">Mark Attendance</a>
-                    </li>
-                <% }); %>
-            <% } else { %>
-                <p>No classes assigned.</p>
-            <% } %>
+            <% classes.forEach(classItem => { %>
+                <li>
+                    <a href="/teacher/attendance/<%= classItem.id %>">Mark Attendance for <%= classItem.grade_name %></a>
+                </li>
+            <% }); %>
         </ul>
-        <a href="/">Logout</a>
+
+        <h2>View Attendance Records</h2>
+        <form action="/teacher/view-attendance" method="GET">
+            <div>
+                <label for="classId">Select Class:</label>
+                <select id="classId" name="classId" required>
+                    <% classes.forEach(classItem => { %>
+                        <option value="<%= classItem.id %>"><%= classItem.grade_name %></option>
+                    <% }); %>
+                </select>
+            </div>
+            <div>
+                <label for="date">Select Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <button type="submit">View Attendance</button>
+        </form>
     </div>
 </body>
 </html>

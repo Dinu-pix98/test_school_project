@@ -151,4 +151,32 @@ router.post('/attendance/:classId', async (req, res) => {
     }
 });
 
+// Route to fetch attendance records for a specific date
+router.get('/attendance/:classId/:date', async (req, res) => {
+    const { classId, date } = req.params; // Get classId and date from the URL
+    try {
+        const query = `
+            SELECT students.student_name, attendance.status, attendance.date
+            FROM attendance
+            JOIN students ON attendance.student_id = students.id
+            WHERE attendance.class_id = ? AND DATE(attendance.date) = ?
+        `;
+        const [attendanceRecords] = await db.query(query, [classId, date]);
+        console.log('Attendance Records:', attendanceRecords); // Debugging: Check fetched records
+        res.render('teacher/attendanceRecords', { attendanceRecords, date }); // Render the attendanceRecords.ejs view
+    } catch (err) {
+        console.error('Error fetching attendance records:', err);
+        res.status(500).send('Error fetching attendance records');
+    }
+});
+
+// Route to handle attendance view form submission
+router.get('/view-attendance', (req, res) => {
+    const { classId, date } = req.query; // Get classId and date from the form
+    if (!classId || !date) {
+        return res.status(400).send('Class ID and Date are required');
+    }
+    res.redirect(`/teacher/attendance/${classId}/${date}`); // Redirect to the attendance records page
+});
+
 module.exports = router;
