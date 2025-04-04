@@ -1,0 +1,116 @@
+router.post('/assign-teacher', (req, res) => {
+    const { teacherId, gradeId } = req.body; // Get teacherId and gradeId from the form submission
+    console.log('Teacher ID:', teacherId); // Debugging: Check teacherId
+    console.log('Grade ID:', gradeId); // Debugging: Check gradeId
+
+    const query = 'UPDATE grades SET teacher_id = ? WHERE id = ?';
+    const db = require('../utils/db');
+
+    db.getConnection().query(query, [teacherId, gradeId], (err, results) => {
+        if (err) {
+            console.error('Error assigning teacher to grade:', err);
+            return res.status(500).send('Error assigning teacher to grade');
+        }
+        console.log('Teacher assigned successfully:', results); // Debugging: Check if the query was successful
+        res.redirect('/admin/teachers'); // Redirect to the teacher list
+    });
+});<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Teacher to Class</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Assign Teacher to Class</h1>
+        <form action="/admin/assign-teacher" method="POST">
+            <div class="form-group">
+                <label for="teacherId">Select Teacher:</label>
+                <select id="teacherId" name="teacherId" required>
+                    <% teachers.forEach(teacher => { %>
+                        <option value="<%= teacher.id %>"><%= teacher.username %></option>
+                    <% }); %>
+                </select><br><br>
+            </div>
+            <div class="form-group">
+                <label for="gradeId">Select Grade:</label>
+                <select id="gradeId" name="gradeId" required>
+                    <% grades.forEach(grade => { %>
+                        <option value="<%= grade.id %>"><%= grade.grade_name %></option>
+                    <% }); %>
+                </select><br><br>
+            </div>
+            <button type="submit">Assign</button>
+        </form>
+        <a href="/admin/dashboard">Back to Dashboard</a>
+    </div>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>
+
+router.post('/register-teacher', async (req, res) => {
+    const { name, email, password } = req.body;
+    try {
+        const hashedPassword = require('crypto').createHash('sha256').update(password).digest('hex');
+        const query = 'INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, "teacher")';
+        const db = require('../utils/db');
+        db.getConnection().query(query, [name, email, hashedPassword], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).send('Error registering teacher');
+            }
+            res.redirect('/admin/teachers');
+        });
+    } catch (error) {
+        res.status(500).send('An error occurred');
+    }
+});
+
+router.get('/assign-teacher', (req, res) => {
+    const teacherQuery = 'SELECT id, username FROM users WHERE role = "teacher"';
+    const gradeQuery = 'SELECT id, grade_name FROM grades';
+    const db = require('../utils/db');
+
+    db.getConnection().query(teacherQuery, (err, teachers) => {
+        if (err) {
+            console.error('Error retrieving teachers:', err);
+            return res.status(500).send('Error retrieving teachers');
+        }
+        console.log('Teachers:', teachers); // Debugging: Check if teachers data is fetched
+
+        db.getConnection().query(gradeQuery, (err, grades) => {
+            if (err) {
+                console.error('Error retrieving grades:', err);
+                return res.status(500).send('Error retrieving grades');
+            }
+            console.log('Grades:', grades); // Debugging: Check if grades data is fetched
+
+            // Pass both teachers and grades to the view
+            res.render('admin/assignTeacher', { teachers, grades });
+        });
+    });
+});
+
+router.get('/teachers', (req, res) => {
+    const query = `
+        SELECT 
+            users.id AS teacher_id, 
+            users.username AS teacher_name, 
+            users.email, 
+            grades.grade_name AS assigned_class
+        FROM users
+        LEFT JOIN grades ON users.id = grades.teacher_id
+        WHERE users.role = "teacher"
+    `;
+    const db = require('../utils/db');
+
+    db.getConnection().query(query, (err, results) => {
+        if (err) {
+            console.error('Error retrieving teacher list:', err);
+            return res.status(500).send('Error retrieving teacher list');
+        }
+        res.render('admin/teacherList', { teachers: results });
+    });
+});

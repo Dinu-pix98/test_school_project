@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Admin Dashboard</h1>
+        <ul>
+            <li><a href="/admin/teachers">View All Teachers</a></li>
+            <li><a href="/admin/assign-teacher">Assign Teacher to Class</a></li>
+            <li><a href="/admin/register-teacher">Register New Teacher</a></li>
+            <li><a href="/admin/register-student">Register New Student</a></li>
+            <li><a href="/admin/grades">Grade List</a></li> <!-- New Grade List Button -->
+        </ul>
+        <!-- Add the Logout Button -->
+        <a href="/admin/logout" class="btn btn-danger">Log Out</a>
+    </div>
+</body>
+</html>
+
+router.get('/students', async (req, res) => {
+    try {
+        const query = `
+            SELECT students.id, students.student_name, students.email, grades.grade_name
+            FROM students
+            JOIN grades ON students.grade_id = grades.id
+        `;
+        const [students] = await db.query(query);
+        res.render('admin/students', { students });
+    } catch (err) {
+        console.error('Error fetching students:', err);
+        res.status(500).send('An error occurred while fetching students');
+    }
+});

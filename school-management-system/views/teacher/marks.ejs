@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/styles.css">
+    <title>Update Marks</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Update Marks</h1>
+        <form action="/teacher/updateMarks" method="POST">
+            <label for="subject">Select Subject:</label>
+            <select id="subject" name="subject" required>
+                <option value="english">English</option>
+                <option value="sinhala">Sinhala</option>
+                <option value="it">IT</option>
+                <option value="maths">Maths</option>
+            </select>
+
+            <label for="studentId">Select Student:</label>
+            <select id="studentId" name="studentId" required>
+                <% students.forEach(function(student) { %>
+                    <option value="<%= student.id %>"><%= student.name %></option>
+                <% }); %>
+            </select>
+
+            <label for="marks">Enter Marks:</label>
+            <input type="number" id="marks" name="marks" min="0" max="100" required>
+
+            <button type="submit">Update Marks</button>
+        </form>
+
+        <h2>Previous Marks</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% previousMarks.forEach(function(mark) { %>
+                    <tr>
+                        <td><%= mark.studentName %></td>
+                        <td><%= mark.subject %></td>
+                        <td><%= mark.marks %></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>

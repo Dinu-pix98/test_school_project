@@ -1,0 +1,124 @@
+-- Create the database
+CREATE DATABASE school_management;
+
+-- Use the database
+USE school_management;
+
+-- Create the users table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'teacher', 'student') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create the grades table
+CREATE TABLE grades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    grade_name VARCHAR(10) NOT NULL UNIQUE
+);
+
+-- Create the subjects table
+CREATE TABLE subjects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    subject_name VARCHAR(50) NOT NULL UNIQUE
+);
+
+-- Create the attendance table
+CREATE TABLE attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    teacher_id INT NOT NULL,
+    date DATE NOT NULL,
+    status ENUM('present', 'absent') NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    FOREIGN KEY (teacher_id) REFERENCES users(id)
+);
+
+-- Create the marks table
+CREATE TABLE marks (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    grade_id INT NOT NULL,
+    marks INT NOT NULL,
+    term ENUM('term1', 'term2', 'term3') NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES users(id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(id),
+    FOREIGN KEY (grade_id) REFERENCES grades(id)
+);
+
+-- Create the timetable table
+CREATE TABLE timetable (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    grade_id INT NOT NULL,
+    subject_id INT NOT NULL,
+    day ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday') NOT NULL,
+    time_slot VARCHAR(20) NOT NULL,
+    FOREIGN KEY (grade_id) REFERENCES grades(id),
+    FOREIGN KEY (subject_id) REFERENCES subjects(id)
+);
+
+-- Insert initial data for grades
+INSERT INTO grades (grade_name) VALUES
+('Grade 1'),
+('Grade 2'),
+('Grade 3'),
+('Grade 4'),
+('Grade 5');
+
+-- Insert initial data for subjects
+INSERT INTO subjects (subject_name) VALUES
+('English'),
+('Sinhala'),
+('IT'),
+('Maths');
+
+--insert users
+INSERT INTO users (username, password, role) VALUES
+('teacher1', 'password1', 'teacher'),
+('teacher2', 'password2', 'teacher');
+
+--modify table grades
+
+ALTER TABLE grades
+ADD COLUMN teacher_id INT,
+ADD CONSTRAINT fk_teacher FOREIGN KEY (teacher_id) REFERENCES users(id);
+
+--modify users
+ALTER TABLE users
+ADD COLUMN email VARCHAR(255) AFTER username;
+
+
+--create table students
+CREATE TABLE students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_name VARCHAR(100) NOT NULL,
+    class_id INT NOT NULL,
+    FOREIGN KEY (class_id) REFERENCES grades(id) ON DELETE CASCADE
+);
+
+---insert data to student table
+INSERT INTO students (student_name, class_id) VALUES
+('Pimi Alwis', 4),
+('Sadun Smith', 4),
+('Nishadi Pallegama', 4),
+('Bagya Sewwandi', 4);
+
+---drop existing table
+DROP TABLE IF EXISTS attendance;
+
+----create table attendance
+CREATE TABLE attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    class_id INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    date DATETIME NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE,
+    FOREIGN KEY (class_id) REFERENCES grades(id) ON DELETE CASCADE
+);
+
+-- Add an `email` column to store the student's email address
+ALTER TABLE students ADD COLUMN email VARCHAR(255) NOT NULL UNIQUE AFTER student_name;

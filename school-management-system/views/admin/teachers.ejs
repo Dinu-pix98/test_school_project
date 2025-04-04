@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All Teachers</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>All Teachers</h1>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% console.log('Teachers:', teachers); // Check if teachers data is fetched %>
+                <% if (teachers && teachers.length > 0) { %>
+                    <% teachers.forEach(teacher => { %>
+                        <tr>
+                            <td><%= teacher.id %></td>
+                            <td><%= teacher.username %></td>
+                            <td><%= teacher.email %></td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="3">No teachers found.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        <a href="/admin/">Back to Dashboard</a>
+    </div>
+</body>
+</html>

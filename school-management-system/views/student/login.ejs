@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Student Login</h1>
+        <form action="/student/login" method="POST">
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <!-- Add the Back to Dashboard Button -->
+        <a href="/" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</body>
+</html>

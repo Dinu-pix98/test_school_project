@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Mark Attendance for Class ID: <%= classId %></h1>
+        <form action="/teacher/attendance/<%= classId %>" method="POST">
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% students.forEach(student => { %>
+                        <tr>
+                            <td><%= student.student_name %></td>
+                            <td>
+                                <!-- Hidden input to include student_id -->
+                                <input type="hidden" name="attendance[<%= student.id %>][student_id]" value="<%= student.id %>">
+                                <!-- Dropdown to select attendance status -->
+                                <select name="attendance[<%= student.id %>][status]" required>
+                                    <option value="present">Present</option>
+                                    <option value="absent">Absent</option>
+                                </select>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            <button type="submit">Submit Attendance</button>
+        </form>
+        <a href="/teacher/dashboard">Back to Dashboard</a>
+    </div>
+</body>
+</html>
+
+router.post('/teacher/attendance/:classId', (req, res) => {
+    const classId = req.params.classId;
+    const attendance = req.body.attendance; // Attendance data from the form
+    console.log('Class ID:', classId); // Debugging: Check classId
+    console.log('Attendance Data:', attendance); // Debugging: Check attendance data
+
+    const db = require('../utils/db');
+
+    if (!attendance) {
+        console.error('No attendance data received');
+        return res.status(400).send('No attendance data received');
+    }
+
+    const queries = [];
+    for (const studentId in attendance) {
+        const query = 'INSERT INTO attendance (student_id, class_id, status, date) VALUES (?, ?, ?, NOW())';
+        console.log(`Inserting attendance for Student ID: ${studentId}, Class ID: ${classId}, Status: ${attendance[studentId].status}`);
+        queries.push(
+            new Promise((resolve, reject) => {
+                db.getConnection().query(query, [studentId, classId, attendance[studentId].status], (err, results) => {
+                    if (err) {
+                        console.error(`Error inserting attendance for Student ID: ${studentId}`, err);
+                        return reject(err);
+                    }
+                    resolve(results);
+                });
+            })
+        );
+    }
+
+    Promise.all(queries)
+        .then(() => {
+            console.log('Attendance saved successfully');
+            res.redirect('/teacher/dashboard'); // Redirect back to the dashboard
+        })
+        .catch(err => {
+            console.error('Error saving attendance:', err);
+            res.status(500).send('Error saving attendance');
+        });
+});

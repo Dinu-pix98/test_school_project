@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher List</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Teacher List</h1>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Assigned Class</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (teachers && teachers.length > 0) { %>
+                    <% teachers.forEach(teacher => { %>
+                        <tr>
+                            <td><%= teacher.teacher_id %></td>
+                            <td><%= teacher.teacher_name %></td>
+                            <td><%= teacher.email || 'Not Provided' %></td>
+                            <td><%= teacher.assigned_class || 'Not Assigned' %></td>
+                        </tr>
+                    <% }); %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="4">No teachers found</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+        <a href="/admin/">Back to Dashboard</a>
+    </div>
+</body>
+</html>
+
+const express = require('express');
+const app = express();
+
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
+router.get('/teachers', (req, res) => {
+    const query = `
+        SELECT 
+            users.id AS teacher_id, 
+            users.username AS teacher_name, 
+            users.email, 
+            grades.grade_name AS assigned_class
+        FROM users
+        LEFT JOIN grades ON users.id = grades.teacher_id
+        WHERE users.role = "teacher"
+    `;
+    const db = require('../utils/db');
+
+    db.getConnection().query(query, (err, results) => {
+        if (err) {
+            console.error('Error retrieving teacher list:', err);
+            return res.status(500).send('Error retrieving teacher list');
+        }
+        console.log('Teachers:', results); // Debugging: Check if teachers data is fetched
+        res.render('admin/teacherList', { teachers: results }); // Render the teacherList.ejs view
+    });
+});
+
+router.post('/assign-teacher', (req, res) => {
+    const { teacherId, gradeId } = req.body;
+    console.log('Teacher ID:', teacherId); // Debugging: Check teacherId
+    console.log('Grade ID:', gradeId); // Debugging: Check gradeId
+
+    const query = 'UPDATE grades SET teacher_id = ? WHERE id = ?';
+    const db = require('../utils/db');
+
+    db.getConnection().query(query, [teacherId, gradeId], (err, results) => {
+        if (err) {
+            console.error('Error assigning teacher to grade:', err);
+            return res.status(500).send('Error assigning teacher to grade');
+        }
+        console.log('Teacher assigned successfully:', results); // Debugging: Check if the query was successful
+        res.redirect('/admin/teachers'); // Redirect to the teacher list
+    });
+});

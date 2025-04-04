@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Teacher Dashboard</h1>
+        <h2>Assigned Classes</h2>
+        <ul>
+            <% if (classes && classes.length > 0) { %>
+                <% classes.forEach(classItem => { %>
+                    <li>
+                        <%= classItem.grade_name %>
+                        <a href="/teacher/attendance/<%= classItem.id %>">Mark Attendance</a>
+                    </li>
+                <% }); %>
+            <% } else { %>
+                <p>No classes assigned.</p>
+            <% } %>
+        </ul>
+        <a href="/">Logout</a>
+    </div>
+</body>
+</html>
+
+<script>
+    const router = require('express').Router();
+
+    router.post('/teacher/login', (req, res) => {
+        const { email, password } = req.body;
+        const query = 'SELECT * FROM users WHERE email = ? AND password = ? AND role = "teacher"';
+        const db = require('../utils/db');
+        const hashedPassword = require('crypto').createHash('sha256').update(password).digest('hex');
+
+        db.getConnection().query(query, [email, hashedPassword], (err, results) => {
+            if (err) {
+                console.error('Error during teacher login:', err);
+                return res.status(500).send('Error during login');
+            }
+            if (results.length > 0) {
+                res.redirect('/teacher/dashboard'); // Redirect to the teacher dashboard
+            } else {
+                res.send('Invalid email or password');
+            }
+        });
+    });
+
+    router.get('/teacher/attendance/:classId', (req, res) => {
+        const classId = req.params.classId;
+        const query = 'SELECT id, student_name FROM students WHERE class_id = ?';
+        const db = require('../utils/db');
+
+        db.getConnection().query(query, [classId], (err, results) => {
+            if (err) {
+                console.error('Error fetching students:', err);
+                return res.status(500).send('Error fetching students');
+            }
+            res.render('teacher/attendance', { students: results, classId }); // Pass students and classId to the view
+        });
+    });
+</script>

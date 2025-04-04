@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, <%= student.student_name %></h1>
+        <p>You are in: <%= student.grade_name %></p>
+
+        <h2>Your Timetable</h2>
+        <% if (timetable.length > 0) { %>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Subject</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% timetable.forEach(entry => { %>
+                        <tr>
+                            <td><%= entry.day_of_week %></td>
+                            <td><%= entry.subject %></td>
+                            <td><%= entry.start_time %></td>
+                            <td><%= entry.end_time %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No timetable available for your class.</p>
+        <% } %>
+
+        <a href="/student/logout">Logout</a>
+    </div>
+</body>
+</html>

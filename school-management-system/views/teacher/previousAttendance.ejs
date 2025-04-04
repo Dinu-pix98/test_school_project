@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Attendance</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Previous Attendance Records</h1>
+        <form action="/teacher/previous-attendance" method="GET">
+            <label for="date">Select Date:</label>
+            <input type="date" id="date" name="date" required>
+            <button type="submit">View Attendance</button>
+        </form>
+
+        <% if (attendanceRecords && attendanceRecords.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% attendanceRecords.forEach(record => { %>
+                        <tr>
+                            <td><%= record.studentName %></td>
+                            <td><%= record.status %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } else { %>
+            <p>No attendance records found for the selected date.</p>
+        <% } %>
+    </div>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>
